@@ -14,7 +14,7 @@ type PageProps = Promise<{
 export default async function EditInvoicePage(props: { params: PageProps }) {
   const params = await props.params;
   return (
-    <Suspense fallback={<EditInvoiceSkeleton />}>
+    <Suspense fallback={<EditInvoiceSkeleton/>}>
       <EditInvoiceContent id={params.id} />
     </Suspense>
   );
