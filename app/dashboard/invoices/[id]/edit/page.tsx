@@ -1,17 +1,23 @@
 import { prisma } from "@/lib/db";
 import { auth } from "@clerk/nextjs";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { InvoiceForm } from "../../components/invoice-form";
+import { headers } from 'next/headers';
 
-export default async function EditInvoicePage({
-  params,
-}: {
-  params: { id: string };
-}) {
-  const { userId } = auth();
+type PageProps = {
+  params: {
+    id: string;
+  };
+};
+
+export default async function EditInvoicePage({ params }: PageProps) {
+  // Force dynamic rendering
+  headers();
+  
+  const { userId } = await auth();
 
   if (!userId) {
-    return null;
+    redirect("/sign-in");
   }
 
   const invoice = await prisma.invoice.findUnique({
