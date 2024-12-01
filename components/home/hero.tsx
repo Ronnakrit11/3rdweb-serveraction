@@ -3,6 +3,9 @@
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
+import { SignInButton, useAuth } from "@clerk/nextjs";
+
+
 
 export function Hero() {
   return (
@@ -22,13 +25,18 @@ export function Hero() {
             Frontend, backend, and onchain tools to build complete web3 apps — on every EVM chain.
           </p>
           <div className="mt-10 flex justify-center gap-4">
+
+          <SignInButton mode="modal">
+            
             <Button 
               size="lg" 
               className="px-6 py-6 text-base font-medium bg-white hover:bg-white/90 text-black"
             >
               Get Started
+              
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
+            </SignInButton>  
             <Button 
               size="lg" 
               variant="outline" 
@@ -36,6 +44,7 @@ export function Hero() {
             >
               Documentation
             </Button>
+            
           </div>
         </motion.div>
 
