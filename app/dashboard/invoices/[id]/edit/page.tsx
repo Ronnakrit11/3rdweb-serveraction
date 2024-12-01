@@ -1,8 +1,6 @@
-import { prisma } from "@/lib/db";
-import { auth } from "@clerk/nextjs";
-import { notFound, redirect } from "next/navigation";
-import { EditInvoiceForm } from "../components/edit-invoice-form";
-import { headers } from 'next/headers';
+import { Suspense } from 'react';
+import { EditInvoiceContent } from '../components/edit-invoice-content';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface EditInvoicePageProps {
   params: {
@@ -10,35 +8,26 @@ interface EditInvoicePageProps {
   };
 }
 
+export default function EditInvoicePage({ params }: EditInvoicePageProps) {
+  return (
+    <Suspense fallback={<EditInvoiceSkeleton />}>
+      <EditInvoiceContent id={params.id} />
+    </Suspense>
+  );
+}
 
-export default async function EditInvoicePage({ params }: EditInvoicePageProps) {
-  // Force dynamic rendering
-  headers();
-
-  const { userId } = await auth();
-
-  if (!userId) {
-    redirect("/sign-in");
-  }
-
-  const invoice = await prisma.invoice.findUnique({
-    where: {
-      id: params.id,
-      userId,
-    },
-    include: {
-      items: true,
-    },
-  });
-
-  if (!invoice) {
-    notFound();
-  }
-
+function EditInvoiceSkeleton() {
   return (
     <div className="container mx-auto py-10">
-      <h1 className="text-4xl font-bold mb-8">Edit Invoice #{invoice.number}</h1>
-      <EditInvoiceForm invoice={invoice} />
+      <Skeleton className="h-10 w-[300px] mb-8" />
+      <div className="space-y-6">
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-10 w-full" />
+        <div className="grid gap-8 sm:grid-cols-2">
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-10 w-full" />
+        </div>
+      </div>
     </div>
   );
 }
