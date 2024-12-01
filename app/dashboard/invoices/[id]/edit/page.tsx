@@ -27,6 +27,18 @@ function EditInvoiceSkeleton() {
           <Skeleton className="h-10 w-full" />
           <Skeleton className="h-10 w-full" />
         </div>
+        <div className="space-y-4">
+          <Skeleton className="h-6 w-24" />
+          <div className="space-y-4">
+            {[1, 2].map((i) => (
+              <div key={i} className="grid gap-4 sm:grid-cols-[1fr,auto,auto]">
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-24" />
+                <Skeleton className="h-10 w-32" />
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );

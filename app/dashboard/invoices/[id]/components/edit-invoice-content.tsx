@@ -20,16 +20,21 @@ export async function EditInvoiceContent({ id }: EditInvoiceContentProps) {
   if (!id) {
     notFound();
   }
-
   const invoice = await prisma.invoice.findUnique({
     where: {
       id,
       userId,
     },
     include: {
-      items: true,
+      items: {
+        orderBy: {
+          id: 'asc'
+        }
+      }
     },
   });
+  
+
 
   if (!invoice) {
     notFound();

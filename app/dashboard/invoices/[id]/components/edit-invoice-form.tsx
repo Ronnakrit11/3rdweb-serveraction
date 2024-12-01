@@ -1,6 +1,11 @@
 'use client';
 
-import { Button } from "@/components/ui/button";
+import { useCallback, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -8,59 +13,54 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
+import { updateInvoice } from '../../actions';
+import { InvoiceWithItems, InvoiceFormData } from '../../types';
+import { CalendarIcon, Trash2 } from 'lucide-react';
+import { Calendar } from '@/components/ui/calendar';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
-import { updateInvoice } from "../../actions";
-import { Invoice, InvoiceItem } from "@prisma/client";
-import { CalendarIcon } from "lucide-react";
-import { cn, formatDate } from "@/lib/utils";
-import { useRouter } from "next/navigation";
-import { useToast } from "@/hooks/use-toast";
+} from '@/components/ui/popover';
+import { cn, formatDate } from '@/lib/utils';
 
 const invoiceItemSchema = z.object({
-  description: z.string().min(1, "Description is required"),
-  quantity: z.number().min(1, "Quantity must be at least 1"),
-  unitPrice: z.number().min(0, "Unit price must be positive"),
+  description: z.string().min(1, 'Description is required'),
+  quantity: z.number().min(1, 'Quantity must be at least 1'),
+  unitPrice: z.number().min(0, 'Unit price must be positive'),
 });
 
-const invoiceSchema = z.object({
-  clientName: z.string().min(1, "Client name is required"),
-  clientEmail: z.string().email("Invalid email address"),
+const invoiceFormSchema = z.object({
+  clientName: z.string().min(1, 'Client name is required'),
+  clientEmail: z.string().email('Invalid email address'),
   dueDate: z.date({
-    required_error: "Due date is required",
+    required_error: 'Due date is required',
   }),
-  status: z.enum(["pending", "paid", "rejected"]),
-  items: z.array(invoiceItemSchema).min(1, "At least one item is required"),
+  status: z.enum(['pending', 'paid', 'rejected']),
+  items: z.array(invoiceItemSchema).min(1, 'At least one item is required'),
 });
-
-type InvoiceFormData = z.infer<typeof invoiceSchema>;
 
 interface EditInvoiceFormProps {
-  invoice: Invoice & { items: InvoiceItem[] };
+  invoice: InvoiceWithItems;
 }
 
 export function EditInvoiceForm({ invoice }: EditInvoiceFormProps) {
   const router = useRouter();
   const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<InvoiceFormData>({
-    resolver: zodResolver(invoiceSchema),
+    resolver: zodResolver(invoiceFormSchema),
     defaultValues: {
       clientName: invoice.clientName,
       clientEmail: invoice.clientEmail,
@@ -74,46 +74,70 @@ export function EditInvoiceForm({ invoice }: EditInvoiceFormProps) {
     },
   });
 
-  async function onSubmit(data: InvoiceFormData) {
+  const onSubmit = useCallback(async (data: InvoiceFormData) => {
+    if (isSubmitting) return;
+    
+    setIsSubmitting(true);
+    
     try {
       const formData = new FormData();
-      formData.append("clientName", data.clientName);
-      formData.append("clientEmail", data.clientEmail);
-      formData.append("dueDate", data.dueDate.toISOString());
-      formData.append("status", data.status);
-      formData.append("items", JSON.stringify(data.items));
-      formData.append(
-        "amount",
-        data.items
-          .reduce((sum, item) => sum + item.quantity * item.unitPrice, 0)
-          .toString()
-      );
-
-      await updateInvoice(invoice.id, formData);
+      formData.append('clientName', data.clientName);
+      formData.append('clientEmail', data.clientEmail);
+      formData.append('dueDate', data.dueDate.toISOString());
+      formData.append('status', data.status);
+      formData.append('items', JSON.stringify(data.items));
       
-      toast({
-        title: "Success",
-        description: "Invoice updated successfully",
-        variant: "default",
-      });
+      const totalAmount = data.items.reduce(
+        (sum, item) => sum + item.quantity * item.unitPrice,
+        0
+      );
+      formData.append('amount', totalAmount.toString());
 
-      router.push("/dashboard/invoices");
-      router.refresh();
+      const result = await updateInvoice(invoice.id, formData);
+      
+      if (result.success) {
+        toast({
+          title: 'Success',
+          description: 'Invoice updated successfully',
+          variant: 'default',
+        });
+
+        router.refresh();
+        router.push('/dashboard/invoices');
+      }
     } catch (error) {
+      console.error('Update invoice error:', error);
       toast({
-        title: "Error",
-        description: "Something went wrong. Please try again.",
-        variant: "destructive",
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to update invoice. Please try again.',
+        variant: 'destructive',
       });
+    } finally {
+      setIsSubmitting(false);
     }
-  }
+  }, [invoice.id, router, toast, isSubmitting]);
 
   const addItem = () => {
-    const currentItems = form.getValues("items") || [];
-    form.setValue("items", [
+    const currentItems = form.getValues('items') || [];
+    form.setValue('items', [
       ...currentItems,
-      { description: "", quantity: 1, unitPrice: 0 },
+      { description: '', quantity: 1, unitPrice: 0 },
     ]);
+  };
+
+  const removeItem = (index: number) => {
+    const currentItems = form.getValues('items');
+    if (currentItems.length > 1) {
+      const newItems = [...currentItems];
+      newItems.splice(index, 1);
+      form.setValue('items', newItems);
+    } else {
+      toast({
+        title: 'Error',
+        description: 'Cannot remove the last item. At least one item is required.',
+        variant: 'destructive',
+      });
+    }
   };
 
   return (
@@ -158,10 +182,10 @@ export function EditInvoiceForm({ invoice }: EditInvoiceFormProps) {
                   <PopoverTrigger asChild>
                     <FormControl>
                       <Button
-                        variant={"outline"}
+                        variant="outline"
                         className={cn(
-                          "w-full pl-3 text-left font-normal",
-                          !field.value && "text-muted-foreground"
+                          'w-full pl-3 text-left font-normal',
+                          !field.value && 'text-muted-foreground'
                         )}
                       >
                         {field.value ? (
@@ -215,10 +239,19 @@ export function EditInvoiceForm({ invoice }: EditInvoiceFormProps) {
         </div>
 
         <div className="space-y-4">
-          <h3 className="text-lg font-medium">Items</h3>
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg font-medium">Items</h3>
+            <Button type="button" variant="outline" onClick={addItem}>
+              Add Item
+            </Button>
+          </div>
+
           <div className="space-y-4">
-            {form.watch("items", []).map((_, index) => (
-              <div key={index} className="grid gap-4 sm:grid-cols-[1fr,auto,auto]">
+            {form.watch('items', []).map((_, index) => (
+              <div
+                key={index}
+                className="grid gap-4 sm:grid-cols-[1fr,auto,auto,auto] items-start"
+              >
                 <FormField
                   control={form.control}
                   name={`items.${index}.description`}
@@ -272,28 +305,31 @@ export function EditInvoiceForm({ invoice }: EditInvoiceFormProps) {
                     </FormItem>
                   )}
                 />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="mt-2"
+                  onClick={() => removeItem(index)}
+                >
+                  <Trash2 className="h-4 w-4 text-destructive" />
+                </Button>
               </div>
             ))}
           </div>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={addItem}
-            className="w-full sm:w-auto"
-          >
-            Add Item
-          </Button>
         </div>
 
         <div className="flex justify-end gap-4">
-          <Button 
-            type="button" 
-            variant="outline" 
-            onClick={() => router.push("/dashboard/invoices")}
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => router.push('/dashboard/invoices')}
           >
             Cancel
           </Button>
-          <Button type="submit">Update Invoice</Button>
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? 'Updating...' : 'Update Invoice'}
+          </Button>
         </div>
       </form>
     </Form>
