@@ -10,19 +10,19 @@ import { InvoiceFilters } from "./components/invoice-filters";
 import { headers } from 'next/headers';
 import { InvoiceModal } from "./components/invoice-modal";
 
-interface SearchParams {
+type PageProps = Promise<{
   status?: string;
   search?: string;
-}
+}>
 
-export default async function InvoicesPage({
-  searchParams,
-}: {
-  searchParams: SearchParams;
-}) {
+export default async function InvoicesPage(
+  props
+    : { searchParams: PageProps }
+) {
   // Force dynamic rendering
   headers();
-  
+  const searchParams = await props.searchParams;
+
   const { userId } = await auth();
 
   if (!userId) {
@@ -42,11 +42,11 @@ export default async function InvoicesPage({
     ...(isValidStatus ? { status: status as InvoiceStatus } : {}),
     ...(search
       ? {
-          OR: [
-            { clientName: { contains: search, mode: "insensitive" as const } },
-            { clientEmail: { contains: search, mode: "insensitive" as const } },
-          ],
-        }
+        OR: [
+          { clientName: { contains: search, mode: "insensitive" as const } },
+          { clientEmail: { contains: search, mode: "insensitive" as const } },
+        ],
+      }
       : {}),
   };
 
@@ -65,22 +65,22 @@ export default async function InvoicesPage({
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <h1 className="text-3xl lg:text-4xl font-bold">
           Invoices
-          {isValidStatus && 
+          {isValidStatus &&
             ` - ${status.charAt(0).toUpperCase() + status.slice(1)}`}
         </h1>
-       <InvoiceModal/>
+        <InvoiceModal />
       </div>
 
       <InvoiceFilters />
-      
+
       {invoices.length === 0 ? (
         <div className="text-center py-10">
           <p className="text-muted-foreground">
             {search
               ? "No invoices found matching your search."
               : isValidStatus
-              ? `No ${status} invoices found.`
-              : "No invoices found. Create your first invoice!"}
+                ? `No ${status} invoices found.`
+                : "No invoices found. Create your first invoice!"}
           </p>
         </div>
       ) : (

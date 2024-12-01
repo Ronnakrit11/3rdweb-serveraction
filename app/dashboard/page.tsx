@@ -11,8 +11,9 @@ import { headers } from 'next/headers';
 export default async function DashboardPage() {
   // Force dynamic rendering
   headers();
-  
+
   const { userId } = await auth();
+
 
   if (!userId) {
     redirect("/sign-in");
@@ -50,18 +51,18 @@ export default async function DashboardPage() {
 
   return (
     <DashboardShell>
-      <DashboardHeader 
+      <DashboardHeader
         heading="Dashboard"
         text="Welcome to your dashboard overview."
       />
       <div className="grid gap-8">
-        <DashboardSummary 
+        <DashboardSummary
           totalClients={totalClients}
           totalAmount={totalAmount}
           paidInvoices={paidInvoices}
           totalInvoices={totalInvoices}
         />
-        <DashboardStats 
+        <DashboardStats
           totalAmount={totalAmount}
           totalInvoices={totalInvoices}
           paidInvoices={paidInvoices}

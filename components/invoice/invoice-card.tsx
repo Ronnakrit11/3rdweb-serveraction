@@ -16,11 +16,11 @@ interface InvoiceCardProps {
 }
 
 export function InvoiceCard({ invoice }: InvoiceCardProps) {
-  const statusColor = {
+  const statusColor: any = {
     pending: "bg-yellow-500",
     paid: "bg-green-500",
     overdue: "bg-red-500",
-  }[invoice.status];
+  };
 
   return (
     <Link href={`/dashboard/invoices/${invoice.id}`}>
@@ -28,7 +28,7 @@ export function InvoiceCard({ invoice }: InvoiceCardProps) {
         <CardHeader>
           <div className="flex justify-between items-center">
             <CardTitle>Invoice #{invoice.number}</CardTitle>
-            <Badge className={statusColor}>{invoice.status}</Badge>
+            <Badge className={statusColor[invoice?.status || 'pending']}>{invoice.status}</Badge>
           </div>
         </CardHeader>
         <CardContent>

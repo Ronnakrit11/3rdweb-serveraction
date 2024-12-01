@@ -4,16 +4,15 @@ import { notFound, redirect } from "next/navigation";
 import { InvoiceForm } from "../../components/invoice-form";
 import { headers } from 'next/headers';
 
-type PageProps = {
-  params: {
-    id: string;
-  };
-};
+type PageProps = Promise<{
+  id: string;
+}>
 
-export default async function EditInvoicePage({ params }: PageProps) {
+export default async function EditInvoicePage(props: { params: PageProps }) {
+  const params = await props.params;
   // Force dynamic rendering
   headers();
-  
+
   const { userId } = await auth();
 
   if (!userId) {

@@ -9,7 +9,7 @@ import { InvoiceMenu } from "../components/invoice-menu";
 export default async function InvoicePage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   const { userId } = auth();
 
@@ -19,7 +19,7 @@ export default async function InvoicePage({
 
   const invoice = await prisma.invoice.findUnique({
     where: {
-      id: params.id,
+      id: (await params)?.id,
       userId,
     },
     include: {
@@ -71,8 +71,8 @@ export default async function InvoicePage({
                       invoice.status === "paid"
                         ? "bg-green-500"
                         : invoice.status === "pending"
-                        ? "bg-yellow-500"
-                        : "bg-red-500"
+                          ? "bg-yellow-500"
+                          : "bg-red-500"
                     }
                   >
                     {invoice.status}
