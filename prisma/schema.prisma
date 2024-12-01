@@ -8,26 +8,38 @@ datasource db {
 }
 
 model Invoice {
-  id          String   @id @default(cuid())
-  number      String   @unique
+  id          String        @id @default(cuid())
+  number      String        @unique
   userId      String
   clientName  String
   clientEmail String
   amount      Float
-  status      String   @default("pending") // pending, paid, overdue
+  status      InvoiceStatus @default(pending)
   dueDate     DateTime
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
   items       InvoiceItem[]
 
   @@index([userId])
+  @@index([status])
+  @@index([clientName])
+  @@index([clientEmail])
+  @@index([createdAt])
 }
 
 model InvoiceItem {
-  id          String   @id @default(cuid())
+  id          String  @id @default(cuid())
   description String
   quantity    Int
   unitPrice   Float
   invoiceId   String
-  invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  invoice     Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([invoiceId])
+}
+
+enum InvoiceStatus {
+  pending
+  paid
+  rejected
 }

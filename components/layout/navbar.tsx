@@ -24,7 +24,7 @@ export function Navbar() {
               <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
                 <path d="M16 8L27.7128 27H4.2872L16 8Z" fill="white"/>
               </svg>
-              <span className="font-bold text-xl">thirdweb</span>
+              <span className="font-bold text-xl">Invoice App</span>
             </Link>
           </div>
 
@@ -55,6 +55,16 @@ export function Navbar() {
             >
               Pricing
             </Link>
+            {isSignedIn && (
+              <Link 
+                href="/dashboard" 
+                className={`text-sm font-medium transition-colors ${
+                  pathname.startsWith("/dashboard") ? "text-white" : "text-gray-300 hover:text-white"
+                }`}
+              >
+                Dashboard
+              </Link>
+            )}
           </div>
 
           <div className="hidden md:flex items-center space-x-4">
@@ -99,6 +109,16 @@ export function Navbar() {
             >
               Pricing
             </Link>
+            {isSignedIn && (
+              <Link 
+                href="/dashboard" 
+                className={`block px-3 py-2 text-base font-medium hover:bg-white/5 rounded-md ${
+                  pathname.startsWith("/dashboard") ? "text-white bg-white/5" : "text-gray-300 hover:text-white"
+                }`}
+              >
+                Dashboard
+              </Link>
+            )}
             <div className="px-3 py-2">
               {!isSignedIn && (
                 <SignInButton mode="modal">

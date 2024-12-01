@@ -1,13 +1,18 @@
 import { DashboardHeader } from "@/components/dashboard/header";
 import { DashboardShell } from "@/components/dashboard/shell";
 import { DashboardStats } from "@/components/dashboard/stats";
+import { DashboardSummary } from "@/components/dashboard/summary";
 import { RecentActivity } from "@/components/dashboard/recent-activity";
 import { auth } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
+import { headers } from 'next/headers';
 
 export default async function DashboardPage() {
-  const { userId } = auth();
+  // Force dynamic rendering
+  headers();
+  
+  const { userId } = await auth();
 
   if (!userId) {
     redirect("/sign-in");
@@ -32,6 +37,17 @@ export default async function DashboardPage() {
   const pendingAmount = invoiceStats
     .find(stat => stat.status === 'pending')?._sum.amount || 0;
 
+  // Get unique client count
+  const uniqueClients = await prisma.invoice.groupBy({
+    by: ['clientEmail'],
+    where: {
+      userId: userId,
+    },
+    _count: true,
+  });
+
+  const totalClients = uniqueClients.length;
+
   return (
     <DashboardShell>
       <DashboardHeader 
@@ -39,6 +55,12 @@ export default async function DashboardPage() {
         text="Welcome to your dashboard overview."
       />
       <div className="grid gap-8">
+        <DashboardSummary 
+          totalClients={totalClients}
+          totalAmount={totalAmount}
+          paidInvoices={paidInvoices}
+          totalInvoices={totalInvoices}
+        />
         <DashboardStats 
           totalAmount={totalAmount}
           totalInvoices={totalInvoices}

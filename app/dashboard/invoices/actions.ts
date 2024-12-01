@@ -3,9 +3,13 @@
 import { auth } from "@clerk/nextjs";
 import { prisma } from "@/lib/db";
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { InvoiceStatus } from "@prisma/client";
+import { headers } from 'next/headers';
 
 export async function createInvoice(formData: FormData) {
-  const { userId } = auth();
+  headers();
+  const { userId } = await auth();
 
   if (!userId) {
     throw new Error("Unauthorized");
@@ -16,6 +20,7 @@ export async function createInvoice(formData: FormData) {
     clientEmail: formData.get('clientEmail') as string,
     amount: parseFloat(formData.get('amount') as string),
     dueDate: new Date(formData.get('dueDate') as string),
+    status: (formData.get('status') as InvoiceStatus) || 'pending',
     items: JSON.parse(formData.get('items') as string),
   };
 
@@ -26,6 +31,7 @@ export async function createInvoice(formData: FormData) {
       clientName: rawData.clientName,
       clientEmail: rawData.clientEmail,
       amount: rawData.amount,
+      status: rawData.status,
       dueDate: rawData.dueDate,
       items: {
         create: rawData.items,
@@ -34,11 +40,12 @@ export async function createInvoice(formData: FormData) {
   });
 
   revalidatePath('/dashboard/invoices');
-  return invoice;
+  redirect('/dashboard/invoices');
 }
 
 export async function updateInvoice(id: string, formData: FormData) {
-  const { userId } = auth();
+  headers();
+  const { userId } = await auth();
 
   if (!userId) {
     throw new Error("Unauthorized");
@@ -58,7 +65,7 @@ export async function updateInvoice(id: string, formData: FormData) {
     clientEmail: formData.get('clientEmail') as string,
     amount: parseFloat(formData.get('amount') as string),
     dueDate: new Date(formData.get('dueDate') as string),
-    status: formData.get('status') as string,
+    status: (formData.get('status') as InvoiceStatus) || 'pending',
     items: JSON.parse(formData.get('items') as string),
   };
 
@@ -83,11 +90,12 @@ export async function updateInvoice(id: string, formData: FormData) {
 
   revalidatePath('/dashboard/invoices');
   revalidatePath(`/dashboard/invoices/${id}`);
-  return updatedInvoice;
+  redirect('/dashboard/invoices');
 }
 
 export async function deleteInvoice(id: string) {
-  const { userId } = auth();
+  headers();
+  const { userId } = await auth();
 
   if (!userId) {
     throw new Error("Unauthorized");
