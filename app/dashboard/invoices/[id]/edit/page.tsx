@@ -1,16 +1,18 @@
 import { prisma } from "@/lib/db";
 import { auth } from "@clerk/nextjs";
 import { notFound, redirect } from "next/navigation";
-import { InvoiceForm } from "../../components/invoice-form";
+import { EditInvoiceForm } from "../components/edit-invoice-form";
 import { headers } from 'next/headers';
 
-type PageProps = Promise<{
-  id: string;
-}>
+interface EditInvoicePageProps {
+  params: {
+    id: string;
+  };
+}
 
-export default async function EditInvoicePage(props: { params: PageProps }) {
-  const params = await props.params;
-  // Force dynamic renderingg
+
+export default async function EditInvoicePage({ params }: EditInvoicePageProps) {
+  // Force dynamic rendering
   headers();
 
   const { userId } = await auth();
@@ -36,7 +38,7 @@ export default async function EditInvoicePage(props: { params: PageProps }) {
   return (
     <div className="container mx-auto py-10">
       <h1 className="text-4xl font-bold mb-8">Edit Invoice #{invoice.number}</h1>
-      <InvoiceForm invoice={invoice} mode="edit" />
+      <EditInvoiceForm invoice={invoice} />
     </div>
   );
 }
