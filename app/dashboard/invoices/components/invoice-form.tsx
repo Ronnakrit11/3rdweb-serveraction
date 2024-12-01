@@ -106,12 +106,14 @@ export function InvoiceForm({ invoice, mode, onSuccess }: InvoiceFormProps) {
         toast({
           title: "Success",
           description: "Invoice created successfully",
+          variant: "default",
         });
       } else if (invoice) {
         await updateInvoice(invoice.id, formData);
         toast({
           title: "Success",
           description: "Invoice updated successfully",
+          variant: "default",
         });
       }
 
