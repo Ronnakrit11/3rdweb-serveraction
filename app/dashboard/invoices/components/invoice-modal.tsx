@@ -9,6 +9,10 @@ import { InvoiceForm } from "./invoice-form";
 export function InvoiceModal() {
   const [open, setOpen] = useState(false);
 
+  const handleSuccess = () => {
+    setOpen(false);
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -22,7 +26,7 @@ export function InvoiceModal() {
           <DialogTitle>Create New Invoice</DialogTitle>
         </DialogHeader>
         <div className="mt-4">
-          <InvoiceForm mode="create" onSuccess={() => setOpen(false)} />
+          <InvoiceForm mode="create" onSuccess={handleSuccess} />
         </div>
       </DialogContent>
     </Dialog>

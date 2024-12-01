@@ -116,6 +116,7 @@ export function InvoiceForm({ invoice, mode, onSuccess }: InvoiceFormProps) {
       }
 
       router.refresh();
+      form.reset(defaultValues);
       onSuccess?.();
     } catch (error) {
       toast({
