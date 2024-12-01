@@ -11,14 +11,14 @@ import { headers } from 'next/headers';
 import { InvoiceModal } from "./components/invoice-modal";
 import { Skeleton } from '@/components/ui/skeleton';
 
-interface PageProps {
-  searchParams?: {
-    status?: string;
-    search?: string;
-  };
-}
+type PageProps = Promise<{
+  status?: string;
+  search?: string;
+}>
 
-async function InvoicesContent({ searchParams }: PageProps) {
+async function InvoicesContent(props: { searchParams: PageProps }) {
+
+
   headers();
   const { userId } = await auth();
 
@@ -28,6 +28,7 @@ async function InvoicesContent({ searchParams }: PageProps) {
 
   try {
     // Validate status parameter
+    const searchParams = await props.searchParams;
     const status = searchParams?.status;
     const isValidStatus = status && ['pending', 'paid', 'rejected'].includes(status);
 
@@ -102,7 +103,7 @@ async function InvoicesContent({ searchParams }: PageProps) {
   }
 }
 
-export default function InvoicesPage(props: PageProps) {
+export default async function InvoicesPage(props: { searchParams: PageProps }) {
   return (
     <Suspense fallback={<InvoicesLoading />}>
       <InvoicesContent {...props} />

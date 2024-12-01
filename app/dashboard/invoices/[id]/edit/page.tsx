@@ -7,8 +7,12 @@ interface EditInvoicePageProps {
     id: string;
   };
 }
+type PageProps = Promise<{
+  id: string;
+}>
 
-export default function EditInvoicePage({ params }: EditInvoicePageProps) {
+export default async function EditInvoicePage(props: { params: PageProps }) {
+  const params = await props.params;
   return (
     <Suspense fallback={<EditInvoiceSkeleton />}>
       <EditInvoiceContent id={params.id} />

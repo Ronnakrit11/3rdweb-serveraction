@@ -26,7 +26,7 @@ export function InvoiceModal() {
           <DialogTitle>Create New Invoice</DialogTitle>
         </DialogHeader>
         <div className="mt-4">
-          <InvoiceForm mode="create" onSuccess={handleSuccess} />
+          <InvoiceForm />
         </div>
       </DialogContent>
     </Dialog>
