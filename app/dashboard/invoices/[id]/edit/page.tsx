@@ -10,7 +10,7 @@ type PageProps = Promise<{
 
 export default async function EditInvoicePage(props: { params: PageProps }) {
   const params = await props.params;
-  // Force dynamic render
+  // Force dynamic renderingg
   headers();
 
   const { userId } = await auth();
