@@ -16,7 +16,7 @@ export default function Home() {
           <div className="w-[800px] h-[800px] bg-purple-900/30 rounded-full blur-3xl" />
         </div>
       </div>
-      <Navbar />
+      <Navbar/>
       <Hero />
       <Features />
       <Pricing />
