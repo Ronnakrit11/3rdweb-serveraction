@@ -2,15 +2,12 @@
 
 import { UserButton } from "@/components/auth/user-button";
 import { Button } from "@/components/ui/button";
-import { Menu } from "lucide-react";
-import { useSidebar } from "@/components/dashboard/sidebar/sidebar-context";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth, SignInButton } from "@clerk/nextjs";
 
 export function Navbar() {
   const pathname = usePathname();
-  const { toggleCollapse } = useSidebar();
   const { isSignedIn } = useAuth();
 
   const menuItems = [
@@ -26,21 +23,9 @@ export function Navbar() {
     <nav className="fixed top-0 w-full bg-background/95 backdrop-blur-sm z-50 border-b border-white/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <div className="flex items-center gap-4">
-            {isSignedIn && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="md:hidden"
-                onClick={toggleCollapse}
-              >
-                <Menu className="h-5 w-5" />
-              </Button>
-            )}
-            <Link href="/" className="flex items-center space-x-2">
-              <span className="font-bold text-xl">Invoice App</span>
-            </Link>
-          </div>
+          <Link href="/" className="flex items-center space-x-2">
+            <span className="font-bold text-xl">Invoice App</span>
+          </Link>
 
           <div className="hidden md:flex items-center space-x-8">
             {menuItems.map((item) => (
@@ -84,6 +69,5 @@ export function Navbar() {
         </div>
       </div>
     </nav>
-    
   );
 }
