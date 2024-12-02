@@ -76,9 +76,9 @@ export function EditInvoiceForm({ invoice }: EditInvoiceFormProps) {
 
   const onSubmit = useCallback(async (data: InvoiceFormData) => {
     if (isSubmitting) return;
-    
+
     setIsSubmitting(true);
-    
+
     try {
       const formData = new FormData();
       formData.append('clientName', data.clientName);
@@ -86,7 +86,7 @@ export function EditInvoiceForm({ invoice }: EditInvoiceFormProps) {
       formData.append('dueDate', data.dueDate.toISOString());
       formData.append('status', data.status);
       formData.append('items', JSON.stringify(data.items));
-      
+
       const totalAmount = data.items.reduce(
         (sum, item) => sum + item.quantity * item.unitPrice,
         0
@@ -94,7 +94,7 @@ export function EditInvoiceForm({ invoice }: EditInvoiceFormProps) {
       formData.append('amount', totalAmount.toString());
 
       const result = await updateInvoice(invoice.id, formData);
-      
+
       if (result.success) {
         toast({
           title: 'Success',
@@ -247,7 +247,8 @@ export function EditInvoiceForm({ invoice }: EditInvoiceFormProps) {
           </div>
 
           <div className="space-y-4">
-            {form.watch('items', []).map((_, index) => (
+
+            {form.getValues('items').map((_, index) => (
               <div
                 key={index}
                 className="grid gap-4 sm:grid-cols-[1fr,auto,auto,auto] items-start"

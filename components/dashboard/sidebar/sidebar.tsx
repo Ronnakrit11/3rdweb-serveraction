@@ -51,13 +51,13 @@ export function Sidebar() {
   return (
     <>
       {/* Mobile Menu Button - Fixed Position */}
-      <div className="fixed top-4 left-4 z-40 lg:hidden">
+      <div className="fixed top-[12px] left-4 z-50 lg:hidden">
         <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
           <SheetTrigger asChild>
             <Button
               variant="ghost"
               size="icon"
-              className="lg:hidden"
+              className="lg:hidden "
               aria-label="Open Menu"
             >
               <Menu className="h-6 w-6" />

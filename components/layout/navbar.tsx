@@ -20,9 +20,9 @@ export function Navbar() {
   const isActive = (path: string) => pathname === path;
 
   return (
-    <nav className="fixed top-0 w-full bg-background/95 backdrop-blur-sm z-50 border-b border-white/10">
+    <nav className="fixed top-0 w-full bg-background/95 backdrop-blur-sm z-40 border-b border-white/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex justify-between items-center h-16 md:ml-[0px] ml-[50px] ">
           <Link href="/" className="flex items-center space-x-2">
             <span className="font-bold text-xl">Invoice App</span>
           </Link>
@@ -32,11 +32,10 @@ export function Navbar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`text-sm font-medium transition-colors ${
-                  isActive(item.href)
-                    ? "text-white"
-                    : "text-gray-300 hover:text-white"
-                }`}
+                className={`text-sm font-medium transition-colors ${isActive(item.href)
+                  ? "text-white"
+                  : "text-gray-300 hover:text-white"
+                  }`}
               >
                 {item.label}
               </Link>
@@ -44,11 +43,10 @@ export function Navbar() {
             {isSignedIn && (
               <Link
                 href="/dashboard"
-                className={`text-sm font-medium transition-colors ${
-                  pathname.startsWith("/dashboard")
-                    ? "text-white"
-                    : "text-gray-300 hover:text-white"
-                }`}
+                className={`text-sm font-medium transition-colors ${pathname.startsWith("/dashboard")
+                  ? "text-white"
+                  : "text-gray-300 hover:text-white"
+                  }`}
               >
                 Dashboard
               </Link>
