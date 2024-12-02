@@ -19,7 +19,7 @@ export function DashboardSummary({
   paidInvoices,
   totalInvoices,
 }: DashboardSummaryProps) {
-  const paymentRate = (paidInvoices / totalInvoices) * 100;
+  const paymentRate = totalInvoices > 0 ? (paidInvoices / totalInvoices) * 100 : 0;
   
   const getPaymentRateColor = (rate: number) => {
     if (rate >= 80) return "text-green-500";
@@ -60,12 +60,12 @@ export function DashboardSummary({
       description: "Unique clients",
       iconBg: "bg-purple-500/10",
       iconColor: "text-purple-500",
-      href: "/dashboard/invoices",
+      href: "/dashboard/customers",
     },
   ];
 
   return (
-    <div className="grid gap-4 md:grid-cols-3">
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {summaryItems.map((item, index) => (
         <motion.div
           key={item.title}
@@ -74,7 +74,7 @@ export function DashboardSummary({
           transition={{ delay: index * 0.1 }}
         >
           <Link href={item.href}>
-            <Card className="p-6 hover:bg-muted/50 transition-colors cursor-pointer">
+            <Card className="p-6 hover:bg-muted/50 transition-colors cursor-pointer h-full">
               <div className="flex items-center gap-4">
                 <div className={`p-2 rounded-lg ${item.iconBg}`}>
                   <item.icon className={`h-6 w-6 ${item.iconColor}`} />

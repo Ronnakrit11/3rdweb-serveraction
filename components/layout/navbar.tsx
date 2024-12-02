@@ -14,7 +14,9 @@ export function Navbar() {
   const { isSignedIn } = useAuth();
 
   const menuItems = [
-    { label: "Dashboard", href: "/dashboard" },
+    { label: "Products", href: "/products" },
+    { label: "Solutions", href: "/solutions" },
+    { label: "Developer", href: "/developer" },
     { label: "Pricing", href: "/pricing" },
   ];
 
@@ -24,17 +26,20 @@ export function Navbar() {
     <nav className="fixed top-0 w-full bg-background/95 backdrop-blur-sm z-50 border-b border-white/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <div className="flex items-center">
+          <div className="flex items-center gap-4">
             {isSignedIn && (
               <Button
                 variant="ghost"
                 size="icon"
-                className="lg:hidden"
+                className="md:hidden"
                 onClick={toggleCollapse}
               >
                 <Menu className="h-5 w-5" />
               </Button>
             )}
+            <Link href="/" className="flex items-center space-x-2">
+              <span className="font-bold text-xl">Invoice App</span>
+            </Link>
           </div>
 
           <div className="hidden md:flex items-center space-x-8">
@@ -51,6 +56,18 @@ export function Navbar() {
                 {item.label}
               </Link>
             ))}
+            {isSignedIn && (
+              <Link
+                href="/dashboard"
+                className={`text-sm font-medium transition-colors ${
+                  pathname.startsWith("/dashboard")
+                    ? "text-white"
+                    : "text-gray-300 hover:text-white"
+                }`}
+              >
+                Dashboard
+              </Link>
+            )}
           </div>
 
           <div className="flex items-center gap-4">

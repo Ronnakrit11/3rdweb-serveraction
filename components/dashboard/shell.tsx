@@ -10,8 +10,8 @@ export function DashboardShell({
   return (
     <div className="flex min-h-screen flex-col">
       <main className="flex-1">
-        <div className="container grid gap-12 px-4 py-8 md:py-12">
-          <div className={cn("grid gap-6", className)} {...props}>
+        <div className="grid gap-6 md:gap-8">
+          <div className={cn("grid gap-4 md:gap-6", className)} {...props}>
             {children}
           </div>
         </div>

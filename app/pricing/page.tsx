@@ -13,6 +13,7 @@ export default function PricingPage() {
         </div>
       </div>
       <Navbar />
+      
       <div className="pt-32">
         <motion.div
           initial={{ opacity: 0, y: 20 }}

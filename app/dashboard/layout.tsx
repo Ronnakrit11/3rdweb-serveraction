@@ -20,10 +20,12 @@ export default async function DashboardLayout({
   return (
     <div className="relative min-h-screen">
       <Sidebar />
-      <div className="flex min-h-screen flex-col lg:pl-64 transition-all duration-300">
+      <div className="flex min-h-screen flex-col md:pl-64 transition-all duration-300">
         <Navbar />
-        <main className="flex-1 bg-background p-8">
-          {children}
+        <main className="flex-1 space-y-4 p-4 pt-20 md:p-8 md:pt-24">
+          <div className="container mx-auto max-w-7xl">
+            {children}
+          </div>
         </main>
       </div>
     </div>
