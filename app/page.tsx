@@ -1,9 +1,14 @@
+'use client';
+
 import { Features } from "@/components/home/features";
 import { Hero } from "@/components/home/hero";
 import { Pricing } from "@/components/home/pricing/pricing";
 import { Navbar } from "@/components/layout/navbar";
+import { useAuth } from "@clerk/nextjs";
 
 export default function Home() {
+  const { isSignedIn } = useAuth();
+
   return (
     <main className="min-h-screen bg-background">
       <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full">

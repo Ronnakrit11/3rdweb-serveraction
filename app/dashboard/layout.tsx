@@ -2,7 +2,6 @@ import { currentUser } from "@clerk/nextjs";
 import { redirect } from "next/navigation";
 import { Navbar } from "@/components/layout/navbar";
 import { Sidebar } from "@/components/dashboard/sidebar/sidebar";
-import { SidebarProvider } from "@/components/dashboard/sidebar/sidebar-context";
 import { headers } from 'next/headers';
 
 export default async function DashboardLayout({
@@ -10,8 +9,7 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Force dynamic rendering
-  headers();
+  await headers();
   
   const user = await currentUser();
 
@@ -20,16 +18,14 @@ export default async function DashboardLayout({
   }
 
   return (
-    <SidebarProvider>
-      <div className="relative min-h-screen">
-        <Sidebar />
-        <div className="flex min-h-screen flex-col lg:pl-64 transition-all duration-300">
-          <Navbar />
-          <main className="flex-1 bg-background p-8">
-            {children}
-          </main>
-        </div>
+    <div className="relative min-h-screen">
+      <Sidebar />
+      <div className="flex min-h-screen flex-col lg:pl-64 transition-all duration-300">
+        <Navbar />
+        <main className="flex-1 bg-background p-8">
+          {children}
+        </main>
       </div>
-    </SidebarProvider>
+    </div>
   );
 }

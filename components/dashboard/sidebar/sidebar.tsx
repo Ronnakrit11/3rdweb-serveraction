@@ -23,7 +23,7 @@ export function Sidebar() {
       className={cn(
         'fixed left-0 top-0 z-40 h-screen border-r bg-background/80 backdrop-blur-sm transition-all duration-300',
         isCollapsed ? 'w-16' : 'w-64',
-        'print:hidden'
+        'print:hidden lg:block' // Show on large screens, hide on print
       )}
     >
       <div className="flex h-full flex-col">
@@ -44,7 +44,7 @@ export function Sidebar() {
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 hidden md:flex"
+              className="h-8 w-8 hidden lg:flex"
               onClick={(e) => {
                 e.preventDefault();
                 toggleCollapse();
@@ -64,32 +64,45 @@ export function Sidebar() {
             <nav className="flex flex-col gap-1">
               {sidebarItems.map((item) => {
                 const isActive = pathname === item.href;
-                return (
-                  <Tooltip key={item.href} delayDuration={0}>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant={isActive ? 'secondary' : 'ghost'}
-                        className={cn(
-                          'w-full justify-start gap-2',
-                          isActive && 'bg-muted/50',
-                          isCollapsed && 'justify-center'
-                        )}
-                        asChild
-                      >
-                        <Link href={item.href}>
-                          <item.icon className="h-4 w-4 shrink-0" />
-                          {!isCollapsed && (
-                            <span className="truncate">{item.title}</span>
+                if (isCollapsed) {
+                  return (
+                    <Tooltip key={item.href}>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant={isActive ? 'secondary' : 'ghost'}
+                          className={cn(
+                            'w-full justify-center',
+                            isActive && 'bg-muted/50'
                           )}
-                        </Link>
-                      </Button>
-                    </TooltipTrigger>
-                    {isCollapsed && (
+                          asChild
+                        >
+                          <Link href={item.href}>
+                            <item.icon className="h-4 w-4" />
+                          </Link>
+                        </Button>
+                      </TooltipTrigger>
                       <TooltipContent side="right" sideOffset={20}>
                         {item.title}
                       </TooltipContent>
+                    </Tooltip>
+                  );
+                }
+
+                return (
+                  <Button
+                    key={item.href}
+                    variant={isActive ? 'secondary' : 'ghost'}
+                    className={cn(
+                      'w-full justify-start gap-2',
+                      isActive && 'bg-muted/50'
                     )}
-                  </Tooltip>
+                    asChild
+                  >
+                    <Link href={item.href}>
+                      <item.icon className="h-4 w-4" />
+                      <span>{item.title}</span>
+                    </Link>
+                  </Button>
                 );
               })}
             </nav>
