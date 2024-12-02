@@ -1,23 +1,42 @@
 'use client';
 
-import { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 
 interface SidebarContextType {
-  isCollapsed: boolean;
-  toggleCollapse: () => void;
+  isOpen: boolean;
+  isDesktop: boolean;
+  toggle: () => void;
+  close: () => void;
 }
 
 const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
 
 export function SidebarProvider({ children }: { children: React.ReactNode }) {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isOpen, setIsOpen] = useState(true);
+  const [isDesktop, setIsDesktop] = useState(false);
 
-  const toggleCollapse = () => {
-    setIsCollapsed(!isCollapsed);
-  };
+  useEffect(() => {
+    // Check if window is desktop size
+    const checkIsDesktop = () => {
+      setIsDesktop(window.innerWidth >= 1024);
+      setIsOpen(window.innerWidth >= 1024);
+    };
+
+    // Set initial value
+    checkIsDesktop();
+
+    // Add event listener for window resize
+    window.addEventListener('resize', checkIsDesktop);
+
+    // Cleanup
+    return () => window.removeEventListener('resize', checkIsDesktop);
+  }, []);
+
+  const toggle = () => setIsOpen(!isOpen);
+  const close = () => setIsOpen(false);
 
   return (
-    <SidebarContext.Provider value={{ isCollapsed, toggleCollapse }}>
+    <SidebarContext.Provider value={{ isOpen, isDesktop, toggle, close }}>
       {children}
     </SidebarContext.Provider>
   );

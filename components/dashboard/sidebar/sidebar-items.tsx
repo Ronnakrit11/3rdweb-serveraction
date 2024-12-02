@@ -26,4 +26,4 @@ export const sidebarItems = [
     href: '/dashboard/customers',
     icon: Users,
   },
-];
+] as const;
