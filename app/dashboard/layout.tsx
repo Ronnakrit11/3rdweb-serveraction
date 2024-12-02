@@ -21,9 +21,9 @@ export default async function DashboardLayout({
 
   return (
     <SidebarProvider>
-      <div className="relative flex min-h-screen">
+      <div className="relative min-h-screen">
         <Sidebar />
-        <div className="flex-1">
+        <div className="flex min-h-screen flex-col lg:pl-64 transition-all duration-300">
           <Navbar />
           <main className="flex-1 bg-background p-8">
             {children}
