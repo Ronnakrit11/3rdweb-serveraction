@@ -10,6 +10,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { formatCurrency } from '@/lib/utils';
+import type { Service } from '@/app/types';
 
 export async function ServiceList() {
   const { userId } = auth();
@@ -46,7 +47,7 @@ export async function ServiceList() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {services.map((service) => (
+          {services.map((service: Service) => (
             <TableRow key={service.id}>
               <TableCell>{service.name}</TableCell>
               <TableCell>{formatCurrency(service.price)}</TableCell>

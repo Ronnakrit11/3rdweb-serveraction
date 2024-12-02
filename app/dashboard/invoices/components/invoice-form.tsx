@@ -14,7 +14,6 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
@@ -23,9 +22,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { createInvoice } from '../actions';
-import { InvoiceFormData } from '../types';
-import { CalendarIcon, Trash2 } from 'lucide-react';
+import { CalendarIcon, Trash2, Plus } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 import {
   Popover,
@@ -33,76 +30,76 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { cn, formatDate } from '@/lib/utils';
-
-const invoiceItemSchema = z.object({
-  description: z.string().min(1, 'Description is required'),
-  quantity: z.number().min(1, 'Quantity must be at least 1'),
-  unitPrice: z.number().min(0, 'Unit price must be positive'),
-});
+import { useCustomers } from '@/hooks/use-customers';
+import { useServices } from '@/hooks/use-services';
 
 const invoiceFormSchema = z.object({
-  clientName: z.string().min(1, 'Client name is required'),
-  clientEmail: z.string().email('Invalid email address'),
+  customerId: z.string().min(1, 'Customer is required'),
   dueDate: z.date({
     required_error: 'Due date is required',
   }),
   status: z.enum(['pending', 'paid', 'rejected']),
-  items: z.array(invoiceItemSchema).min(1, 'At least one item is required'),
+  items: z.array(z.object({
+    serviceId: z.string().min(1, 'Service is required'),
+    quantity: z.number().min(1, 'Quantity must be at least 1'),
+  })).min(1, 'At least one item is required'),
 });
-
-const defaultValues: InvoiceFormData = {
-  clientName: '',
-  clientEmail: '',
-  dueDate: new Date(),
-  status: 'pending',
-  items: [{ description: '', quantity: 1, unitPrice: 0 }],
-};
 
 export function InvoiceForm() {
   const router = useRouter();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { customers, isLoading: isLoadingCustomers } = useCustomers();
+  const { services, isLoading: isLoadingServices } = useServices();
 
-  const form = useForm<InvoiceFormData>({
+  const form = useForm<z.infer<typeof invoiceFormSchema>>({
     resolver: zodResolver(invoiceFormSchema),
-    defaultValues,
+    defaultValues: {
+      status: 'pending',
+      items: [{ serviceId: '', quantity: 1 }],
+    },
   });
 
-  const onSubmit = useCallback(async (data: InvoiceFormData) => {
+  const onSubmit = useCallback(async (data: z.infer<typeof invoiceFormSchema>) => {
     if (isSubmitting) return;
     
     setIsSubmitting(true);
     
     try {
       const formData = new FormData();
-      formData.append('clientName', data.clientName);
-      formData.append('clientEmail', data.clientEmail);
+      formData.append('customerId', data.customerId);
       formData.append('dueDate', data.dueDate.toISOString());
       formData.append('status', data.status);
       formData.append('items', JSON.stringify(data.items));
-      
-      const totalAmount = data.items.reduce(
-        (sum, item) => sum + item.quantity * item.unitPrice,
-        0
-      );
-      formData.append('amount', totalAmount.toString());
 
-      const result = await createInvoice(formData);
-      
+      const response = await fetch('/api/invoices', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(error || 'Failed to create invoice');
+      }
+
+      const result = await response.json();
+
       if (result.success) {
         toast({
           title: 'Success',
           description: 'Invoice created successfully',
-          variant: 'default',
         });
+
         router.refresh();
         router.push('/dashboard/invoices');
+      } else {
+        throw new Error('Failed to create invoice');
       }
     } catch (error) {
       console.error('Create invoice error:', error);
       toast({
         title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to create invoice. Please try again.',
+        description: error instanceof Error ? error.message : 'Failed to create invoice',
         variant: 'destructive',
       });
     } finally {
@@ -114,7 +111,7 @@ export function InvoiceForm() {
     const currentItems = form.getValues('items') || [];
     form.setValue('items', [
       ...currentItems,
-      { description: '', quantity: 1, unitPrice: 0 },
+      { serviceId: '', quantity: 1 },
     ]);
   };
 
@@ -133,32 +130,33 @@ export function InvoiceForm() {
     }
   };
 
+  if (isLoadingCustomers || isLoadingServices) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         <FormField
           control={form.control}
-          name="clientName"
+          name="customerId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Client Name</FormLabel>
-              <FormControl>
-                <Input {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="clientEmail"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Client Email</FormLabel>
-              <FormControl>
-                <Input type="email" {...field} />
-              </FormControl>
+              <FormLabel>Customer</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a customer" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {customers?.map((customer) => (
+                    <SelectItem key={customer.id} value={customer.id}>
+                      {customer.name} ({customer.email})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <FormMessage />
             </FormItem>
           )}
@@ -216,7 +214,7 @@ export function InvoiceForm() {
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select a status" />
+                      <SelectValue placeholder="Select status" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -235,24 +233,36 @@ export function InvoiceForm() {
           <div className="flex justify-between items-center">
             <h3 className="text-lg font-medium">Items</h3>
             <Button type="button" variant="outline" onClick={addItem}>
+              <Plus className="mr-2 h-4 w-4" />
               Add Item
             </Button>
           </div>
 
           <div className="space-y-4">
-            {form.watch('items', []).map((_, index) => (
+            {form.watch('items').map((_, index) => (
               <div
                 key={index}
-                className="grid gap-4 sm:grid-cols-[1fr,auto,auto,auto] items-start"
+                className="grid gap-4 sm:grid-cols-[1fr,auto,auto] items-start"
               >
                 <FormField
                   control={form.control}
-                  name={`items.${index}.description`}
+                  name={`items.${index}.serviceId`}
                   render={({ field }) => (
                     <FormItem>
-                      <FormControl>
-                        <Input placeholder="Description" {...field} />
-                      </FormControl>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a service" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {services?.map((service) => (
+                            <SelectItem key={service.id} value={service.id}>
+                              {service.name} (${service.price})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -263,35 +273,12 @@ export function InvoiceForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormControl>
-                        <Input
+                        <input
                           type="number"
-                          placeholder="Qty"
+                          min="1"
+                          className="flex h-10 w-24 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                           {...field}
-                          onChange={(e) =>
-                            field.onChange(parseInt(e.target.value) || 0)
-                          }
-                          className="w-24"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name={`items.${index}.unitPrice`}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          placeholder="Price"
-                          {...field}
-                          onChange={(e) =>
-                            field.onChange(parseFloat(e.target.value) || 0)
-                          }
-                          className="w-32"
+                          onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
                         />
                       </FormControl>
                       <FormMessage />
@@ -302,7 +289,6 @@ export function InvoiceForm() {
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="mt-2"
                   onClick={() => removeItem(index)}
                 >
                   <Trash2 className="h-4 w-4 text-destructive" />

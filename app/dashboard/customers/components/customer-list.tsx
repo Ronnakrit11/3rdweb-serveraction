@@ -9,6 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import type { Customer } from '@/app/types';
 
 export async function CustomerList() {
   const { userId } = auth();
@@ -45,7 +46,7 @@ export async function CustomerList() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {customers.map((customer) => (
+          {customers.map((customer: Customer) => (
             <TableRow key={customer.id}>
               <TableCell>{customer.name}</TableCell>
               <TableCell>{customer.email}</TableCell>
