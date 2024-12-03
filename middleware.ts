@@ -10,6 +10,14 @@ export default authMiddleware({
     }
     return null;
   },
+  afterAuth(auth, req) {
+    // Ensure clean redirects after sign out
+    if (!auth.userId && !auth.isPublicRoute) {
+      const signOutUrl = new URL("/", req.url);
+      return Response.redirect(signOutUrl);
+    }
+    return null;
+  },
 });
  
 export const config = {
