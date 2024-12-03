@@ -4,7 +4,7 @@ export default authMiddleware({
   publicRoutes: ["/", "/pricing"],
   ignoredRoutes: ["/api/webhook"],
   beforeAuth: (req) => {
-    // Handle preflight requests
+    // Handle preflight requestss
     if (req.method === "OPTIONS") {
       return new Response(null, { status: 204 });
     }
