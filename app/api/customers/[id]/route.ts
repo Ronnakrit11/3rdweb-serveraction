@@ -57,6 +57,7 @@ type DeleteParams = {
 export async function DELETE(
   _request: Request,
   { params }: DeleteParams
+  
 ) {
   try {
     const { userId } = auth();
