@@ -9,6 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { CustomerMenu } from './customer-menu';
 import type { Customer } from '@/app/types';
 
 export async function CustomerList() {
@@ -43,6 +44,7 @@ export async function CustomerList() {
             <TableHead>Customer Name</TableHead>
             <TableHead>Email</TableHead>
             <TableHead>Created At</TableHead>
+            <TableHead className="w-[70px]"></TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -52,6 +54,9 @@ export async function CustomerList() {
               <TableCell>{customer.email}</TableCell>
               <TableCell>
                 {new Date(customer.createdAt).toLocaleDateString()}
+              </TableCell>
+              <TableCell>
+                <CustomerMenu customer={customer} />
               </TableCell>
             </TableRow>
           ))}
